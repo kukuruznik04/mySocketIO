@@ -1,0 +1,15 @@
+// entries unique to running on the "cicd" machine
+
+{
+	"env":
+	{
+		//Set your development-specific values in local.json
+		"node_env": "production",
+		"host":"10.140.177.83"
+
+	},
+	"hotelDB":
+    {
+        "url": "mongodb://10.140.177.102:27017/hoteldb"
+    }
+}

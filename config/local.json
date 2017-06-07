@@ -1,0 +1,11 @@
+//Default items for config module
+//This file is shared and updated across the entire team
+//Usage: var config = require('config'); config.env.node_env;
+//Please do NOT store passwords (plain text or base64) in this file
+
+{
+	"hotelDB":
+	{
+		"url": "mongodb://localhost:27017/hoteldb"
+	}
+}

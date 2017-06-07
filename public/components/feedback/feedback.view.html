@@ -1,0 +1,11 @@
+<div id="feedback" ng-controller="feedbackController">
+    <nav class="nav nav-pills" role="navigation">
+        <li role="presentation" class="active"><a href="#">Home</a></li>
+        <li role="presentation"><a href="#">Profile</a></li>
+        <li role="presentation"><a href="#">Messages</a></li>
+    </nav>
+    <div ng-repeat="feedback in feedbackList">
+        {{feedback.name}}
+        {{feedback.comments}}
+    </div>
+</div>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" ng-app="hotelApp">
+<head>
+	<meta charset="UTF-8">
+	<!--<base href="/">-->
+
+	<title>Starter Node and Angular</title>
+
+	<!-- custom styles -->
+	<link rel="stylesheet" type="text/css" href="css/feedback/feedback.css">
+
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="libs/bootstrap/dist/css/bootstrap.min.css">
+	<!-- <link rel="stylesheet" href="libs/angular-bootstrap/ui-bootstrap.min.css"> -->
+
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300|Open+Sans:400,700|PT+Sans+Narrow:400,700" rel="stylesheet">
+
+
+	<!-- JS -->
+	<script src="libs/angular/angular.min.js"></script>
+	<!--<script src="libs/angular-route/angular-route.min.js"></script>-->
+	<script src="libs/angular-ui-router/release/angular-ui-router.min.js"></script>
+	<script src="libs/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+	<script src="libs/socket.io-client/dist/socket.io.js"></script>
+
+	<!-- ANGULAR CUSTOM -->
+	<script src="app.module.js"></script>
+	<script src="components/feedback/feedback.controller.js"></script>
+	<script src="components/feedback/feedback.service.js"></script>
+	<script src="components/account/login.controller.js"></script>
+	<script src="components/account/login.service.js"></script>
+	<script src="app.routes.js"></script>
+
+</head>
+<body>
+<div class="container">
+
+	<div ui-view></div>
+
+	<!--&lt;!&ndash; Headers &ndash;&gt;-->
+	<!--<header class="navbar-fixed-top">-->
+		<!--<ng-include src="'components/header/header1.view.html'" ng-controller="header1Controller as headerPrimary"></ng-include>-->
+		<!--<ng-include src="'components/header/header.secondary.view.html'" ng-controller="headerSecondaryController as headerSecondary"></ng-include>-->
+		<!--<ng-include src="'components/header/header.tertiary.view.html'" ng-controller="headerTertiaryController as headerTertiary"></ng-include>-->
+	<!--</header>-->
+	<!--<ng-include src="'components/header/header.spacers.view.html'" ng-controller="headerSpacersController"></ng-include>-->
+	<!--&lt;!&ndash; Content &ndash;&gt;-->
+	<!--<div class="main-outside-container">-->
+		<!--<main class="scrollbar-inner main-scrollbar" jquery-scrollbar cigs-window-resize-action>-->
+			<!--<div ng-view></div>-->
+		<!--</main>-->
+	<!--</div>-->
+	<!--&lt;!&ndash; Footers &ndash;&gt;-->
+	<!--<ng-include src="'components/footer/footer-spacers.view.html'" ng-controller="footerSpacersController"></ng-include>-->
+	<!--<footer class="navbar-fixed-bottom">-->
+		<!--<div ng-include="getFooter2()" ng-controller="footerSecondaryController"></div>-->
+		<!--<div ng-include="getFooter1()" ng-controller="footerPrimaryController"></div>-->
+	<!--</footer>-->
+</div>
+</body>
+</html>

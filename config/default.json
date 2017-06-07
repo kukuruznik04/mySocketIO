@@ -1,0 +1,25 @@
+//Default items for config module
+//This file is shared and updated across the entire team
+//Usage: var config = require('config'); config.env.node_env;
+//Please do NOT store passwords (plain text or base64) in this file
+
+{
+	"env":
+	{
+		//Set your development-specific values in local.json
+		"host": "localhost",
+		"port": 443,
+		"httpport": 8081
+	},
+
+	"hotelDB": 
+	{
+		"url": "mongodb://172.27.70.53:27017/hoteldb"
+	},
+	
+	//add additional entries as needed - try to keep things with obvious names and grouped:
+	"example":
+	{
+		"items": "Can be nested"
+	}
+}

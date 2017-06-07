@@ -1,0 +1,1 @@
+angular.module('hotelApp', ['ui.router', 'ui.bootstrap']);

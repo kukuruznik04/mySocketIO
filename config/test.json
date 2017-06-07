@@ -1,0 +1,19 @@
+//Default items for config module - TEST environment
+//This file is shared and updated across the entire team
+//Usage: var config = require('config'); config.env.node_env;
+//Please do NOT store passwords (plain text or base64) in this file
+
+{
+	"env":
+	{
+		//Set your development-specific values in local.json
+		"port": 443,
+		"httpport": 80,
+		"node_env": "test"
+	},
+
+	"hotelDB": 
+	{
+		"url": "mongodb://localhost:27017/test-hoteldb"
+	}
+}

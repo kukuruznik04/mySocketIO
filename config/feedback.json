@@ -1,0 +1,15 @@
+// entries unique to running on the "feedback" machine
+
+{
+	"env":
+	{
+		//Set your development-specific values in local.json
+		"node_env": "feedback",
+		"host": "172.27.70.31"
+
+	},
+	"hotelDB": 
+	{
+		"url": "mongodb://172.27.70.31:27017/hoteldb"
+	}
+}
