@@ -23,6 +23,8 @@ Ignore system-specific config override
 /.*
 #But allow gitignore settings's file
 !.gitignore
+#But allow gitignore settings's file
+!.bowerrc
 #Allow Eclipse IDE settings
 !/.project
 !/.settings
