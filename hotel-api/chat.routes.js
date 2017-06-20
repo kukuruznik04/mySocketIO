@@ -17,6 +17,33 @@ router.use(function (req, res, next) {
 	next(); // make sure we go to the next routes and don't stop here
 });
 
+router.get('/onlineUsers4Channel', function (req, res) {
+	// get online users on specific namespace & room
+	var onlineUsers = [];
+	for (var i = 0; i < connectedUsers.length; i++) {
+
+		if (onlineUsers.indexOf(connectedUsers[i].user) === -1) {
+			onlineUsers.push(connectedUsers[i].user);
+		}
+	}
+	console.log("online users " + onlineUsers);
+	res.send(onlineUsers);
+});
+
+router.get('/checkUserOnline', function (req, res) {
+	// get online users on specific namespace & room
+	var online = false;
+
+	for (var i = 0; i < connectedUsers.length; i++) {
+		if (connectedUsers[i].user === req.query.user) {
+			online = true;
+			break;
+		}
+	}
+
+	res.send(online);
+});
+
 router.get('/initChannel', function (req, res) {
 
 	let namespace = req.query.channel;
@@ -59,7 +86,8 @@ router.get('/initChannel', function (req, res) {
 
                 socket.join(data.room, function (err) {
                 	console.log(socket.rooms);
-                    console.log("Cannot connect to the chat room. See logs details");
+                	if (err)
+                    	console.log("Cannot connect to the chat room. See logs details " + err);
 					// socket.to('room number', 'a new user has joined the room'); // broadcast to everyone in the room
                 });
                 let connectedUser = data;
@@ -109,6 +137,23 @@ router.get('/initChannel', function (req, res) {
 					// remove user from connectedUsers
 					removeUserFromChannel(data);
 				}
+			});
+
+			// chat message sent
+			// broadcast a user's message to other users
+			socket.on('send:message', function (data) {
+				console.log('send:message: ' + data.text + ' from: ' + data.user + ' chat room: ' + data.room);
+				//io.sockets.emit('send:message', {   <--- send to everybody
+				socket.broadcast.to(data.room).emit('send:message2', {
+					user: data.user,
+					firstname: data.firstname,
+					lastname: data.lastname,
+					text: data.text,
+					date: data.date,
+					room: data.room,
+					visibility: data.visibility,
+					isDone: data.isDone
+				});
 			});
 		})
 	}

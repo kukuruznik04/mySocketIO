@@ -1,1 +1,1 @@
-angular.module('hotelApp', ['ui.router', 'ui.bootstrap']);
+angular.module('hotelApp', ['ui.router', 'ui.bootstrap', 'ngStorage']);
