@@ -66,7 +66,7 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 					if (cc.onlineUsers.indexOf(data.user) === -1) {
 						console.log('user:connect received : updates are done');
 						cc.onlineUsers.push(data.user);
-						cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
+						//cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
 					}
 				}
 			});
@@ -78,14 +78,31 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 					if (cc.onlineUsers.indexOf(data.user) >= 0) {
 						console.log('user:disconnect received : updates are done');
 						cc.onlineUsers.splice(cc.onlineUsers.indexOf(data.user), 1);
-						cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
+						//cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
 					}
 				}
 			});
 
-			socket.on('send:message2', function (data) {
+			socket.on('send:message', function (data) {
 				cc.msgList.push(data);
 				console.log(cc.msgList);
+				if (!$scope.$$phase) {
+					$scope.$apply();
+				};
+				socket.emit('send:message:confirmation', {
+					user: data.user,
+					firstname: data.firstname,
+					lastname: data.lastname,
+					text: data.text,
+					date: data.date,
+					room: data.room,
+					visibility: data.visibility,
+					isDone: data.isDone
+				});
+			});
+
+			socket.on('send:message:confirmation', function (data) {
+				console.log(data);
 			});
 		}, function (response) {
 			console.log(response);

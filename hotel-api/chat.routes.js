@@ -144,7 +144,7 @@ router.get('/initChannel', function (req, res) {
 			socket.on('send:message', function (data) {
 				console.log('send:message: ' + data.text + ' from: ' + data.user + ' chat room: ' + data.room);
 				//io.sockets.emit('send:message', {   <--- send to everybody
-				socket.broadcast.to(data.room).emit('send:message2', {
+				socket.broadcast.to(data.room).emit('send:message', {
 					user: data.user,
 					firstname: data.firstname,
 					lastname: data.lastname,
@@ -153,6 +153,16 @@ router.get('/initChannel', function (req, res) {
 					room: data.room,
 					visibility: data.visibility,
 					isDone: data.isDone
+				});
+			});
+
+			// chat message sent
+			// broadcast a user's message to other users
+			socket.on('send:message:confirmation', function (data) {
+				console.log('send:message: ' + data.text + ' from: ' + data.user + ' chat room: ' + data.room);
+				//io.sockets.emit('send:message', {   <--- send to everybody
+				socket.broadcast.to(data.room).emit('send:message:confirmation', {
+					text: data.text
 				});
 			});
 		})
