@@ -10,6 +10,10 @@ angular
 			.state('login', {
 				url: '/login',
 				templateUrl: 'components/account/login.view.html'
+			})
+			.state('messages', {
+				url: '/messages',
+				templateUrl: 'components/contacts/messages.view.html'
 			});
 
 		$urlRouterProvider.otherwise('/login');

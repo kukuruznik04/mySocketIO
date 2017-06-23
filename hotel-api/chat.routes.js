@@ -19,15 +19,15 @@ router.use(function (req, res, next) {
 
 router.get('/onlineUsers4Channel', function (req, res) {
 	// get online users on specific namespace & room
-	var onlineUsers = [];
-	for (var i = 0; i < connectedUsers.length; i++) {
-
-		if (onlineUsers.indexOf(connectedUsers[i].user) === -1) {
-			onlineUsers.push(connectedUsers[i].user);
-		}
-	}
-	console.log("online users " + onlineUsers);
-	res.send(onlineUsers);
+	// var onlineUsers = [];
+	// for (var i = 0; i < connectedUsers.length; i++) {
+	//
+	// 	if (onlineUsers.indexOf(connectedUsers[i].username) === -1) {
+	// 		onlineUsers.push(connectedUsers[i].username);
+	// 	}
+	// }
+	// console.log("online users " + onlineUsers);
+	res.send(connectedUsers);
 });
 
 router.get('/checkUserOnline', function (req, res) {
@@ -35,7 +35,7 @@ router.get('/checkUserOnline', function (req, res) {
 	var online = false;
 
 	for (var i = 0; i < connectedUsers.length; i++) {
-		if (connectedUsers[i].user === req.query.user) {
+		if (connectedUsers[i].username === req.query.username) {
 			online = true;
 			break;
 		}
@@ -61,8 +61,9 @@ router.get('/initChannel', function (req, res) {
 		res.send('Channel successfully created.');
 
 		nsp.on('connection', function(socket){
-			let user = req.query.user;
+			let user = req.query.username;
 			console.log('User connected');
+			//console.log(socket);
 
 			socket.on('disconnect', function(){
 				console.log('User disconnected');
@@ -70,7 +71,7 @@ router.get('/initChannel', function (req, res) {
 			});
 
 			// join the chat room
-            socket.on('connect:room', function (data) {
+            socket.on('connect:room', function (data, cb) {
 
                 // current rooms for the channel
                 let isRoom = false;
@@ -85,7 +86,7 @@ router.get('/initChannel', function (req, res) {
                 }
 
                 socket.join(data.room, function (err) {
-                	console.log(socket.rooms);
+                	//console.log(socket.rooms);
                 	if (err)
                     	console.log("Cannot connect to the chat room. See logs details " + err);
 					// socket.to('room number', 'a new user has joined the room'); // broadcast to everyone in the room
@@ -94,25 +95,27 @@ router.get('/initChannel', function (req, res) {
                 let isThere = false;
                 if (connectedUsers.length > 0) {
                     for (let i = 0; i < connectedUsers.length; i++) {
-                        if (connectedUsers[i].user === data.user) {
+                        if (connectedUsers[i].username === data.username) {
                             isThere = true;
-                            console.log("user is there " + connectedUser.user);
+                            console.log("user is there " + connectedUser.username);
                         }
                     }
                 }
                 if (isThere === false) {
+					connectedUser.socketId = socket.id;
                     connectedUsers.push(connectedUser);
-                    console.log("user is NOT there " + connectedUser.user);
+                    console.log("user is NOT there " + connectedUser.username);
                     console.log("connectedUsers :" + JSON.stringify(connectedUsers));
                     for (let i=0; i < rooms.length; i++) {
-                        console.log('connect broadcast to room ' + rooms[i].room + ' ' +rooms[i].experienceId);
+                        console.log('connect broadcast to room ' + rooms[i].room);
                         rooms[i].socket.broadcast.to(rooms[i].room).emit('user:connect', {
-                            user: data.user,
+							username: data.username,
                             text: 'has connected the chat room.' + data.room,
                             room: data.room
                         });
                     }
                 }
+				cb && cb();
             });
 
 			// leave the chat room
@@ -122,7 +125,7 @@ router.get('/initChannel', function (req, res) {
 					for (let i=0; i < rooms.length; i++) {
 						console.log('disconnect broadcast to room ' + rooms[i].room);
 						rooms[i].socket.broadcast.to(rooms[i].room).emit('user:disconnect', {
-							user: data.user,
+							username: data.username,
 							text: 'has left the chat room.' + data.room,
 							room: data.room
 						});
@@ -142,10 +145,27 @@ router.get('/initChannel', function (req, res) {
 			// chat message sent
 			// broadcast a user's message to other users
 			socket.on('send:message', function (data) {
-				console.log('send:message: ' + data.text + ' from: ' + data.user + ' chat room: ' + data.room);
+				console.log('send:message: ' + data.text + ' from: ' + data.username + ' chat room: ' + data.room);
 				//io.sockets.emit('send:message', {   <--- send to everybody
 				socket.broadcast.to(data.room).emit('send:message', {
-					user: data.user,
+					username: data.username,
+					firstname: data.firstname,
+					lastname: data.lastname,
+					text: data.text,
+					date: data.date,
+					room: data.room,
+					visibility: data.visibility,
+					isDone: data.isDone
+				});
+			});
+
+			// chat message sent
+			// broadcast a user's message to other users
+			socket.on('send:private:message', function (data) {
+				console.log('send:message: ' + data.text + ' from: ' + data.username + ' chat room: ' + data.room + ' socketId: ' + data.socketId);
+				//io.sockets.emit('send:message', {   <--- send to everybody
+				socket.broadcast.to(data.socketId).emit('send:private:message', {
+					username: data.username,
 					firstname: data.firstname,
 					lastname: data.lastname,
 					text: data.text,
@@ -159,7 +179,7 @@ router.get('/initChannel', function (req, res) {
 			// chat message sent
 			// broadcast a user's message to other users
 			socket.on('send:message:confirmation', function (data) {
-				console.log('send:message: ' + data.text + ' from: ' + data.user + ' chat room: ' + data.room);
+				console.log('send:message: ' + data.text + ' from: ' + data.username + ' chat room: ' + data.room);
 				//io.sockets.emit('send:message', {   <--- send to everybody
 				socket.broadcast.to(data.room).emit('send:message:confirmation', {
 					text: data.text
@@ -176,10 +196,10 @@ function removeUserFromChannel(user) {
 	// remove user
 	if (connectedUsers.length > 0) {
 		for (let i = 0; i < connectedUsers.length; i++) {
-			if (connectedUsers[i].user === user.user) {
-				log.debug('Removed user from online users for channel: ' + JSON.stringify(user));
+			if (connectedUsers[i].username === user.username) {
+				console.log('Removed user from online users for channel: ' + JSON.stringify(user));
 				connectedUsers.splice(i, 1);
-				log.debug("connectedUsers :" + JSON.stringify(connectedUsers));
+				console.log("connectedUsers :" + JSON.stringify(connectedUsers));
 			}
 		}
 	}

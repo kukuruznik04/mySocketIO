@@ -1,7 +1,16 @@
 <div id="chat">
-    <form ng-submit="cc.sendMessage()">
-        <input type="text" ng-model="cc.message" placeholder="message" class="messages"/>
-        <button type="submit">Send</button>
-    </form>
-    <div ng-repeat="message in cc.msgList">{{message.text}}</div>
+
+
+    <uib-tabset type="pills">
+        <uib-tab index="$index" heading="{{user.username}}" ng-repeat="user in cc.onlineUsers track by $index">
+            {{user.socketId}}
+            <form ng-submit="cc.sendPrivateMessage(user.socketId)">
+                <input type="text" ng-model="cc.message" placeholder="message" class="messages"/>
+                <button type="submit">Send</button>
+            </form>
+            <div ng-repeat="message in cc.msgList">{{message.text}}</div>
+        </uib-tab>
+    </uib-tabset>
+
+
 </div>

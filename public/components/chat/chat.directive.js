@@ -24,9 +24,9 @@ angular.module('hotelApp')
 		};
 	});
 
-chatDirectiveController.$inject = ['$scope', '$localStorage', 'chatService'];
+chatDirectiveController.$inject = ['$scope', '$localStorage', 'chatService', '$location', '$q'];
 
-function chatDirectiveController($scope, $localStorage, chatService) {
+function chatDirectiveController($scope, $localStorage, chatService, $location, $q) {
 
 	let cc = this;
 
@@ -34,7 +34,7 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 	cc.msgList = [];
 	cc.currentRoom = '1';
 
-	let channel = '/feedback';
+	let channel = $location.path();
 	let room = '1';
 	let socket = io().connect();
 
@@ -43,41 +43,32 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 			socket = io(channel).connect();
 			connectToRoom(room);
 
-			chatService.getOnlineUsers4Channel()
-				.then(function (data) {
-					console.log(data);
-					if (data === undefined) {
-						cc.onlineUsers = [];
-					} else {
-						cc.onlineUsers = data.data;
-					}
-
-					if (cc.onlineUsers.indexOf(cc.user) === -1) {
-						cc.onlineUsers.push($localStorage.username);
-					}
-				}, function (response) {
-					console.log("couldn't retrieve user status");
-				});
-
 			socket.on('user:connect', function (data) {
 				//update msgList with new user status
-				console.log('user:connect received : ' + data.user);
-				if (data.user !== cc.user) {
-					if (cc.onlineUsers.indexOf(data.user) === -1) {
+				console.log('user:connect received : ' + data.username);
+				if (data.username !== cc.username) {
+					if (cc.onlineUsers.indexOf(data.username) === -1) {
 						console.log('user:connect received : updates are done');
-						cc.onlineUsers.push(data.user);
+						cc.onlineUsers.push(data);
+						if (!$scope.$$phase) {
+							$scope.$apply();
+						}
 						//cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
 					}
 				}
 			});
 
+			socket.on('connect:room', function (data) {
+				console.log(data);
+			});
+
 			socket.on('user:disconnect', function (data) {
 				//update msgList with new user status
-				console.log('user:disconnect received : ' + data.user);
-				if (data.user !== cc.user) {
-					if (cc.onlineUsers.indexOf(data.user) >= 0) {
+				console.log('user:disconnect received : ' + data.username);
+				if (data.username !== cc.username) {
+					if (cc.onlineUsers.indexOf(data.username) >= 0) {
 						console.log('user:disconnect received : updates are done');
-						cc.onlineUsers.splice(cc.onlineUsers.indexOf(data.user), 1);
+						cc.onlineUsers.splice(cc.onlineUsers.indexOf(data.username), 1);
 						//cc.msgList = chatService.updateMsgListOnlineStatus(cc.msgList, cc.onlineUsers);
 					}
 				}
@@ -88,21 +79,25 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 				console.log(cc.msgList);
 				if (!$scope.$$phase) {
 					$scope.$apply();
-				};
+				}
 				socket.emit('send:message:confirmation', {
-					user: data.user,
-					firstname: data.firstname,
-					lastname: data.lastname,
+					username: data.username,
 					text: data.text,
 					date: data.date,
-					room: data.room,
-					visibility: data.visibility,
-					isDone: data.isDone
+					room: data.room
 				});
 			});
 
+			socket.on('send:private:message', function (data) {
+				cc.msgList.push(data);
+				console.log(cc.msgList);
+				if (!$scope.$$phase) {
+					$scope.$apply();
+				}
+			});
+
 			socket.on('send:message:confirmation', function (data) {
-				console.log(data);
+				//console.log(data);
 			});
 		}, function (response) {
 			console.log(response);
@@ -112,8 +107,26 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 		// channel could have multiple rooms
 		socket.emit('connect:room', {
 			room: room,
-			user: $localStorage.username
-		});
+			username: $localStorage.username
+		}, getOnlineUsers4Channel);
+	}
+
+	function getOnlineUsers4Channel() {
+		chatService.getOnlineUsers4Channel()
+			.then(function (data) {
+				console.log(data.data);
+				if (data === undefined) {
+					cc.onlineUsers = [];
+				} else {
+					cc.onlineUsers = data.data;
+				}
+
+				// if (cc.onlineUsers.indexOf(cc.user) === -1) {
+				// 	cc.onlineUsers.push({username:$localStorage.username, socketId:socket.id});
+				// }
+			}, function (response) {
+				console.log("couldn't retrieve user status");
+			});
 	}
 
 	cc.sendMessage = function () {
@@ -127,7 +140,7 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 			cc.newMsg =
 				{
 					room: cc.currentRoom,
-					user: $localStorage.username,
+					username: $localStorage.username,
 					text: cc.message,
 					date: timestamp
 				};
@@ -139,10 +152,34 @@ function chatDirectiveController($scope, $localStorage, chatService) {
 		}
 	};
 
+	cc.sendPrivateMessage = function (socketId) {
+		if (cc.message === '') {
+			//sharedDataService.openErrorModal('sm', true, {'title':'Collaboration warning','instructions':'Please leave a comment before sending.'});
+
+		} else {
+			var d = new Date();
+			var timestamp = d.toJSON();
+
+			cc.newMsg =
+				{
+					room: cc.currentRoom,
+					username: $localStorage.username,
+					text: cc.message,
+					date: timestamp,
+					socketId: socketId
+				};
+
+
+			socket.emit('send:private:message', cc.newMsg);
+
+			//cc.message = '';
+		}
+	};
+
 	cc.leaveRoom = function (room, disconnect) {
 		socket.emit('leave:room', {
 			room: room,
-			user: cc.user,
+			username: cc.username,
 			disconnect: disconnect
 		});
 	};
