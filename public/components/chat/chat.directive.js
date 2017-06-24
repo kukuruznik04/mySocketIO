@@ -152,7 +152,7 @@ function chatDirectiveController($scope, $localStorage, chatService, $location, 
 		}
 	};
 
-	cc.sendPrivateMessage = function (socketId) {
+	cc.sendPrivateMessage = function (username) {
 		if (cc.message === '') {
 			//sharedDataService.openErrorModal('sm', true, {'title':'Collaboration warning','instructions':'Please leave a comment before sending.'});
 
@@ -166,7 +166,7 @@ function chatDirectiveController($scope, $localStorage, chatService, $location, 
 					username: $localStorage.username,
 					text: cc.message,
 					date: timestamp,
-					socketId: socketId
+					to: username
 				};
 
 

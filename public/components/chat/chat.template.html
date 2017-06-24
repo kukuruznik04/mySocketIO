@@ -3,8 +3,8 @@
 
     <uib-tabset type="pills">
         <uib-tab index="$index" heading="{{user.username}}" ng-repeat="user in cc.onlineUsers track by $index">
-            {{user.socketId}}
-            <form ng-submit="cc.sendPrivateMessage(user.socketId)">
+            {{user.username}}
+            <form ng-submit="cc.sendPrivateMessage(user.username)">
                 <input type="text" ng-model="cc.message" placeholder="message" class="messages"/>
                 <button type="submit">Send</button>
             </form>

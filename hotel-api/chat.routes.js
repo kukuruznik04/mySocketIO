@@ -86,11 +86,16 @@ router.get('/initChannel', function (req, res) {
                 }
 
                 socket.join(data.room, function (err) {
-                	//console.log(socket.rooms);
+                	console.log(socket.rooms);
                 	if (err)
                     	console.log("Cannot connect to the chat room. See logs details " + err);
 					// socket.to('room number', 'a new user has joined the room'); // broadcast to everyone in the room
                 });
+				socket.join(data.username, function (err) {
+					console.log(socket.rooms);
+					if (err)
+						console.log("Cannot connect to the self chat room. See logs details " + err);
+				});
                 let connectedUser = data;
                 let isThere = false;
                 if (connectedUsers.length > 0) {
@@ -102,7 +107,7 @@ router.get('/initChannel', function (req, res) {
                     }
                 }
                 if (isThere === false) {
-					connectedUser.socketId = socket.id;
+					//connectedUser.socketId = socket.id;
                     connectedUsers.push(connectedUser);
                     console.log("user is NOT there " + connectedUser.username);
                     console.log("connectedUsers :" + JSON.stringify(connectedUsers));
@@ -162,9 +167,9 @@ router.get('/initChannel', function (req, res) {
 			// chat message sent
 			// broadcast a user's message to other users
 			socket.on('send:private:message', function (data) {
-				console.log('send:message: ' + data.text + ' from: ' + data.username + ' chat room: ' + data.room + ' socketId: ' + data.socketId);
+				console.log('send:message: ' + data.text + ' from: ' + data.username + ' chat room: ' + data.room + ' to: ' + data.to);
 				//io.sockets.emit('send:message', {   <--- send to everybody
-				socket.broadcast.to(data.socketId).emit('send:private:message', {
+				socket.broadcast.to(data.to).emit('send:private:message', {
 					username: data.username,
 					firstname: data.firstname,
 					lastname: data.lastname,
